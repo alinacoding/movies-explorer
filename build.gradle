@@ -1,5 +1,10 @@
+plugins {
+  id "org.inferred.processors" version "1.2.15"
+}
+
 apply plugin: 'application'
 apply plugin: 'idea'
+
 
 sourceCompatibility = 9
 targetCompatibility = 9
@@ -8,7 +13,7 @@ repositories {
      mavenCentral()
 }
 
-mainClassName = 'com.movies.exporer.WikipediaParser'
+mainClassName = 'com.movies.explorer.WikipediaParser'
 
 jar {
     manifest {
@@ -22,7 +27,7 @@ jar {
 applicationDefaultJvmArgs = ["--add-modules", "java.xml.bind"]
 
 dependencies {
-
+	processor 'org.immutables:value:2.5.6'
 	compile group: 'com.squareup.okhttp', name: 'okhttp', version: '2.7.5'
 	implementation 'com.squareup.okhttp3:okhttp:3.10.0'
 	compile group: 'org.jsoup', name: 'jsoup', version: '1.11.2'
