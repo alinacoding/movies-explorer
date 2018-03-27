@@ -27,25 +27,19 @@ import javax.annotation.concurrent.NotThreadSafe;
 public final class ImmutableMovieData implements MovieData {
   private final String title;
   private final ImmutableList<String> companies;
-  private final ImmutableList<String> directors;
-  private final ImmutableList<String> screenwriters;
-  private final ImmutableList<String> actors;
+  private final PeopleRoles peopleRoles;
   private final ImmutableList<String> genres;
   private final ImmutableList<String> countries;
 
   private ImmutableMovieData(
       String title,
       ImmutableList<String> companies,
-      ImmutableList<String> directors,
-      ImmutableList<String> screenwriters,
-      ImmutableList<String> actors,
+      PeopleRoles peopleRoles,
       ImmutableList<String> genres,
       ImmutableList<String> countries) {
     this.title = title;
     this.companies = companies;
-    this.directors = directors;
-    this.screenwriters = screenwriters;
-    this.actors = actors;
+    this.peopleRoles = peopleRoles;
     this.genres = genres;
     this.countries = countries;
   }
@@ -67,27 +61,11 @@ public final class ImmutableMovieData implements MovieData {
   }
 
   /**
-   * @return The value of the {@code directors} attribute
+   * @return The value of the {@code peopleRoles} attribute
    */
   @Override
-  public ImmutableList<String> directors() {
-    return directors;
-  }
-
-  /**
-   * @return The value of the {@code screenwriters} attribute
-   */
-  @Override
-  public ImmutableList<String> screenwriters() {
-    return screenwriters;
-  }
-
-  /**
-   * @return The value of the {@code actors} attribute
-   */
-  @Override
-  public ImmutableList<String> actors() {
-    return actors;
+  public PeopleRoles peopleRoles() {
+    return peopleRoles;
   }
 
   /**
@@ -115,14 +93,7 @@ public final class ImmutableMovieData implements MovieData {
   public final ImmutableMovieData withTitle(String value) {
     if (this.title.equals(value)) return this;
     String newValue = Objects.requireNonNull(value, "title");
-    return new ImmutableMovieData(
-        newValue,
-        this.companies,
-        this.directors,
-        this.screenwriters,
-        this.actors,
-        this.genres,
-        this.countries);
+    return new ImmutableMovieData(newValue, this.companies, this.peopleRoles, this.genres, this.countries);
   }
 
   /**
@@ -132,14 +103,7 @@ public final class ImmutableMovieData implements MovieData {
    */
   public final ImmutableMovieData withCompanies(String... elements) {
     ImmutableList<String> newValue = ImmutableList.copyOf(elements);
-    return new ImmutableMovieData(
-        this.title,
-        newValue,
-        this.directors,
-        this.screenwriters,
-        this.actors,
-        this.genres,
-        this.countries);
+    return new ImmutableMovieData(this.title, newValue, this.peopleRoles, this.genres, this.countries);
   }
 
   /**
@@ -151,108 +115,19 @@ public final class ImmutableMovieData implements MovieData {
   public final ImmutableMovieData withCompanies(Iterable<String> elements) {
     if (this.companies == elements) return this;
     ImmutableList<String> newValue = ImmutableList.copyOf(elements);
-    return new ImmutableMovieData(
-        this.title,
-        newValue,
-        this.directors,
-        this.screenwriters,
-        this.actors,
-        this.genres,
-        this.countries);
+    return new ImmutableMovieData(this.title, newValue, this.peopleRoles, this.genres, this.countries);
   }
 
   /**
-   * Copy the current immutable object with elements that replace the content of {@link MovieData#directors() directors}.
-   * @param elements The elements to set
-   * @return A modified copy of {@code this} object
-   */
-  public final ImmutableMovieData withDirectors(String... elements) {
-    ImmutableList<String> newValue = ImmutableList.copyOf(elements);
-    return new ImmutableMovieData(
-        this.title,
-        this.companies,
-        newValue,
-        this.screenwriters,
-        this.actors,
-        this.genres,
-        this.countries);
-  }
-
-  /**
-   * Copy the current immutable object with elements that replace the content of {@link MovieData#directors() directors}.
+   * Copy the current immutable object by setting a value for the {@link MovieData#peopleRoles() peopleRoles} attribute.
    * A shallow reference equality check is used to prevent copying of the same value by returning {@code this}.
-   * @param elements An iterable of directors elements to set
-   * @return A modified copy of {@code this} object
+   * @param value A new value for peopleRoles
+   * @return A modified copy of the {@code this} object
    */
-  public final ImmutableMovieData withDirectors(Iterable<String> elements) {
-    if (this.directors == elements) return this;
-    ImmutableList<String> newValue = ImmutableList.copyOf(elements);
-    return new ImmutableMovieData(
-        this.title,
-        this.companies,
-        newValue,
-        this.screenwriters,
-        this.actors,
-        this.genres,
-        this.countries);
-  }
-
-  /**
-   * Copy the current immutable object with elements that replace the content of {@link MovieData#screenwriters() screenwriters}.
-   * @param elements The elements to set
-   * @return A modified copy of {@code this} object
-   */
-  public final ImmutableMovieData withScreenwriters(String... elements) {
-    ImmutableList<String> newValue = ImmutableList.copyOf(elements);
-    return new ImmutableMovieData(this.title, this.companies, this.directors, newValue, this.actors, this.genres, this.countries);
-  }
-
-  /**
-   * Copy the current immutable object with elements that replace the content of {@link MovieData#screenwriters() screenwriters}.
-   * A shallow reference equality check is used to prevent copying of the same value by returning {@code this}.
-   * @param elements An iterable of screenwriters elements to set
-   * @return A modified copy of {@code this} object
-   */
-  public final ImmutableMovieData withScreenwriters(Iterable<String> elements) {
-    if (this.screenwriters == elements) return this;
-    ImmutableList<String> newValue = ImmutableList.copyOf(elements);
-    return new ImmutableMovieData(this.title, this.companies, this.directors, newValue, this.actors, this.genres, this.countries);
-  }
-
-  /**
-   * Copy the current immutable object with elements that replace the content of {@link MovieData#actors() actors}.
-   * @param elements The elements to set
-   * @return A modified copy of {@code this} object
-   */
-  public final ImmutableMovieData withActors(String... elements) {
-    ImmutableList<String> newValue = ImmutableList.copyOf(elements);
-    return new ImmutableMovieData(
-        this.title,
-        this.companies,
-        this.directors,
-        this.screenwriters,
-        newValue,
-        this.genres,
-        this.countries);
-  }
-
-  /**
-   * Copy the current immutable object with elements that replace the content of {@link MovieData#actors() actors}.
-   * A shallow reference equality check is used to prevent copying of the same value by returning {@code this}.
-   * @param elements An iterable of actors elements to set
-   * @return A modified copy of {@code this} object
-   */
-  public final ImmutableMovieData withActors(Iterable<String> elements) {
-    if (this.actors == elements) return this;
-    ImmutableList<String> newValue = ImmutableList.copyOf(elements);
-    return new ImmutableMovieData(
-        this.title,
-        this.companies,
-        this.directors,
-        this.screenwriters,
-        newValue,
-        this.genres,
-        this.countries);
+  public final ImmutableMovieData withPeopleRoles(PeopleRoles value) {
+    if (this.peopleRoles == value) return this;
+    PeopleRoles newValue = Objects.requireNonNull(value, "peopleRoles");
+    return new ImmutableMovieData(this.title, this.companies, newValue, this.genres, this.countries);
   }
 
   /**
@@ -262,14 +137,7 @@ public final class ImmutableMovieData implements MovieData {
    */
   public final ImmutableMovieData withGenres(String... elements) {
     ImmutableList<String> newValue = ImmutableList.copyOf(elements);
-    return new ImmutableMovieData(
-        this.title,
-        this.companies,
-        this.directors,
-        this.screenwriters,
-        this.actors,
-        newValue,
-        this.countries);
+    return new ImmutableMovieData(this.title, this.companies, this.peopleRoles, newValue, this.countries);
   }
 
   /**
@@ -281,14 +149,7 @@ public final class ImmutableMovieData implements MovieData {
   public final ImmutableMovieData withGenres(Iterable<String> elements) {
     if (this.genres == elements) return this;
     ImmutableList<String> newValue = ImmutableList.copyOf(elements);
-    return new ImmutableMovieData(
-        this.title,
-        this.companies,
-        this.directors,
-        this.screenwriters,
-        this.actors,
-        newValue,
-        this.countries);
+    return new ImmutableMovieData(this.title, this.companies, this.peopleRoles, newValue, this.countries);
   }
 
   /**
@@ -298,14 +159,7 @@ public final class ImmutableMovieData implements MovieData {
    */
   public final ImmutableMovieData withCountries(String... elements) {
     ImmutableList<String> newValue = ImmutableList.copyOf(elements);
-    return new ImmutableMovieData(
-        this.title,
-        this.companies,
-        this.directors,
-        this.screenwriters,
-        this.actors,
-        this.genres,
-        newValue);
+    return new ImmutableMovieData(this.title, this.companies, this.peopleRoles, this.genres, newValue);
   }
 
   /**
@@ -317,14 +171,7 @@ public final class ImmutableMovieData implements MovieData {
   public final ImmutableMovieData withCountries(Iterable<String> elements) {
     if (this.countries == elements) return this;
     ImmutableList<String> newValue = ImmutableList.copyOf(elements);
-    return new ImmutableMovieData(
-        this.title,
-        this.companies,
-        this.directors,
-        this.screenwriters,
-        this.actors,
-        this.genres,
-        newValue);
+    return new ImmutableMovieData(this.title, this.companies, this.peopleRoles, this.genres, newValue);
   }
 
   /**
@@ -341,15 +188,13 @@ public final class ImmutableMovieData implements MovieData {
   private boolean equalTo(ImmutableMovieData another) {
     return title.equals(another.title)
         && companies.equals(another.companies)
-        && directors.equals(another.directors)
-        && screenwriters.equals(another.screenwriters)
-        && actors.equals(another.actors)
+        && peopleRoles.equals(another.peopleRoles)
         && genres.equals(another.genres)
         && countries.equals(another.countries);
   }
 
   /**
-   * Computes a hash code from attributes: {@code title}, {@code companies}, {@code directors}, {@code screenwriters}, {@code actors}, {@code genres}, {@code countries}.
+   * Computes a hash code from attributes: {@code title}, {@code companies}, {@code peopleRoles}, {@code genres}, {@code countries}.
    * @return hashCode value
    */
   @Override
@@ -357,9 +202,7 @@ public final class ImmutableMovieData implements MovieData {
     int h = 5381;
     h += (h << 5) + title.hashCode();
     h += (h << 5) + companies.hashCode();
-    h += (h << 5) + directors.hashCode();
-    h += (h << 5) + screenwriters.hashCode();
-    h += (h << 5) + actors.hashCode();
+    h += (h << 5) + peopleRoles.hashCode();
     h += (h << 5) + genres.hashCode();
     h += (h << 5) + countries.hashCode();
     return h;
@@ -375,9 +218,7 @@ public final class ImmutableMovieData implements MovieData {
         .omitNullValues()
         .add("title", title)
         .add("companies", companies)
-        .add("directors", directors)
-        .add("screenwriters", screenwriters)
-        .add("actors", actors)
+        .add("peopleRoles", peopleRoles)
         .add("genres", genres)
         .add("countries", countries)
         .toString();
@@ -409,13 +250,12 @@ public final class ImmutableMovieData implements MovieData {
   @NotThreadSafe
   public static class Builder {
     private static final long INIT_BIT_TITLE = 0x1L;
-    private long initBits = 0x1L;
+    private static final long INIT_BIT_PEOPLE_ROLES = 0x2L;
+    private long initBits = 0x3L;
 
     private @Nullable String title;
     private ImmutableList.Builder<String> companies = ImmutableList.builder();
-    private ImmutableList.Builder<String> directors = ImmutableList.builder();
-    private ImmutableList.Builder<String> screenwriters = ImmutableList.builder();
-    private ImmutableList.Builder<String> actors = ImmutableList.builder();
+    private @Nullable PeopleRoles peopleRoles;
     private ImmutableList.Builder<String> genres = ImmutableList.builder();
     private ImmutableList.Builder<String> countries = ImmutableList.builder();
 
@@ -441,9 +281,7 @@ public final class ImmutableMovieData implements MovieData {
       Objects.requireNonNull(instance, "instance");
       title(instance.title());
       addAllCompanies(instance.companies());
-      addAllDirectors(instance.directors());
-      addAllScreenwriters(instance.screenwriters());
-      addAllActors(instance.actors());
+      peopleRoles(instance.peopleRoles());
       addAllGenres(instance.genres());
       addAllCountries(instance.countries());
       return (MovieData.Builder) this;
@@ -506,134 +344,14 @@ public final class ImmutableMovieData implements MovieData {
     }
 
     /**
-     * Adds one element to {@link MovieData#directors() directors} list.
-     * @param element A directors element
+     * Initializes the value for the {@link MovieData#peopleRoles() peopleRoles} attribute.
+     * @param peopleRoles The value for peopleRoles 
      * @return {@code this} builder for use in a chained invocation
      */
     @CanIgnoreReturnValue 
-    public final MovieData.Builder addDirectors(String element) {
-      this.directors.add(element);
-      return (MovieData.Builder) this;
-    }
-
-    /**
-     * Adds elements to {@link MovieData#directors() directors} list.
-     * @param elements An array of directors elements
-     * @return {@code this} builder for use in a chained invocation
-     */
-    @CanIgnoreReturnValue 
-    public final MovieData.Builder addDirectors(String... elements) {
-      this.directors.add(elements);
-      return (MovieData.Builder) this;
-    }
-
-    /**
-     * Sets or replaces all elements for {@link MovieData#directors() directors} list.
-     * @param elements An iterable of directors elements
-     * @return {@code this} builder for use in a chained invocation
-     */
-    @CanIgnoreReturnValue 
-    public final MovieData.Builder directors(Iterable<String> elements) {
-      this.directors = ImmutableList.builder();
-      return addAllDirectors(elements);
-    }
-
-    /**
-     * Adds elements to {@link MovieData#directors() directors} list.
-     * @param elements An iterable of directors elements
-     * @return {@code this} builder for use in a chained invocation
-     */
-    @CanIgnoreReturnValue 
-    public final MovieData.Builder addAllDirectors(Iterable<String> elements) {
-      this.directors.addAll(elements);
-      return (MovieData.Builder) this;
-    }
-
-    /**
-     * Adds one element to {@link MovieData#screenwriters() screenwriters} list.
-     * @param element A screenwriters element
-     * @return {@code this} builder for use in a chained invocation
-     */
-    @CanIgnoreReturnValue 
-    public final MovieData.Builder addScreenwriters(String element) {
-      this.screenwriters.add(element);
-      return (MovieData.Builder) this;
-    }
-
-    /**
-     * Adds elements to {@link MovieData#screenwriters() screenwriters} list.
-     * @param elements An array of screenwriters elements
-     * @return {@code this} builder for use in a chained invocation
-     */
-    @CanIgnoreReturnValue 
-    public final MovieData.Builder addScreenwriters(String... elements) {
-      this.screenwriters.add(elements);
-      return (MovieData.Builder) this;
-    }
-
-    /**
-     * Sets or replaces all elements for {@link MovieData#screenwriters() screenwriters} list.
-     * @param elements An iterable of screenwriters elements
-     * @return {@code this} builder for use in a chained invocation
-     */
-    @CanIgnoreReturnValue 
-    public final MovieData.Builder screenwriters(Iterable<String> elements) {
-      this.screenwriters = ImmutableList.builder();
-      return addAllScreenwriters(elements);
-    }
-
-    /**
-     * Adds elements to {@link MovieData#screenwriters() screenwriters} list.
-     * @param elements An iterable of screenwriters elements
-     * @return {@code this} builder for use in a chained invocation
-     */
-    @CanIgnoreReturnValue 
-    public final MovieData.Builder addAllScreenwriters(Iterable<String> elements) {
-      this.screenwriters.addAll(elements);
-      return (MovieData.Builder) this;
-    }
-
-    /**
-     * Adds one element to {@link MovieData#actors() actors} list.
-     * @param element A actors element
-     * @return {@code this} builder for use in a chained invocation
-     */
-    @CanIgnoreReturnValue 
-    public final MovieData.Builder addActors(String element) {
-      this.actors.add(element);
-      return (MovieData.Builder) this;
-    }
-
-    /**
-     * Adds elements to {@link MovieData#actors() actors} list.
-     * @param elements An array of actors elements
-     * @return {@code this} builder for use in a chained invocation
-     */
-    @CanIgnoreReturnValue 
-    public final MovieData.Builder addActors(String... elements) {
-      this.actors.add(elements);
-      return (MovieData.Builder) this;
-    }
-
-    /**
-     * Sets or replaces all elements for {@link MovieData#actors() actors} list.
-     * @param elements An iterable of actors elements
-     * @return {@code this} builder for use in a chained invocation
-     */
-    @CanIgnoreReturnValue 
-    public final MovieData.Builder actors(Iterable<String> elements) {
-      this.actors = ImmutableList.builder();
-      return addAllActors(elements);
-    }
-
-    /**
-     * Adds elements to {@link MovieData#actors() actors} list.
-     * @param elements An iterable of actors elements
-     * @return {@code this} builder for use in a chained invocation
-     */
-    @CanIgnoreReturnValue 
-    public final MovieData.Builder addAllActors(Iterable<String> elements) {
-      this.actors.addAll(elements);
+    public final MovieData.Builder peopleRoles(PeopleRoles peopleRoles) {
+      this.peopleRoles = Objects.requireNonNull(peopleRoles, "peopleRoles");
+      initBits &= ~INIT_BIT_PEOPLE_ROLES;
       return (MovieData.Builder) this;
     }
 
@@ -734,19 +452,13 @@ public final class ImmutableMovieData implements MovieData {
       if (initBits != 0) {
         throw new IllegalStateException(formatRequiredAttributesMessage());
       }
-      return new ImmutableMovieData(
-          title,
-          companies.build(),
-          directors.build(),
-          screenwriters.build(),
-          actors.build(),
-          genres.build(),
-          countries.build());
+      return new ImmutableMovieData(title, companies.build(), peopleRoles, genres.build(), countries.build());
     }
 
     private String formatRequiredAttributesMessage() {
       List<String> attributes = Lists.newArrayList();
       if ((initBits & INIT_BIT_TITLE) != 0) attributes.add("title");
+      if ((initBits & INIT_BIT_PEOPLE_ROLES) != 0) attributes.add("peopleRoles");
       return "Cannot build MovieData, some of required attributes are not set " + attributes;
     }
   }

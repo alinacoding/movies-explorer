@@ -8,9 +8,7 @@ public interface MovieData {
 
     String title();
     List<String> companies();
-    List<String> directors();
-    List<String> screenwriters();
-    List<String> actors();
+    PeopleRoles peopleRoles();
     List<String> genres();
     List<String> countries();
 
@@ -19,6 +17,5 @@ public interface MovieData {
     static Builder builder() {
         return new Builder();
     }
-
 
 }

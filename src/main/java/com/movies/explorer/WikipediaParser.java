@@ -5,21 +5,32 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-import javax.annotation.concurrent.Immutable;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class WikipediaParser {
 
-
     public static void main(String[] args) throws IOException {
+        List<MovieData> movies = getMoviesForYear(2018);
+        movies.forEach(movie -> {
+            System.out.println(movie.title());
+            System.out.println(movie.companies());
+            System.out.println(movie.peopleRoles().actors());
+            System.out.println(movie.peopleRoles().directors());
+            System.out.println(movie.peopleRoles().screenwriters());
+            System.out.println(movie.countries());
+            System.out.println(movie.genres());
+        });
+    }
 
-        Document doc = Jsoup.connect("https://en.wikipedia.org/wiki/2018_in_film").get();
+    private static List<MovieData> getMoviesForYear(int year) throws IOException{
+        List<MovieData> movies = new ArrayList<>();
+        Document doc = Jsoup.connect("https://en.wikipedia.org/wiki/" + year + "_in_film").get();
         Elements wikiTables = doc.select("table.wikitable").not(".sortable").not("[style]");
         for (Element wikiTable : wikiTables) {
             Elements tableRows = wikiTable.children().select("tr");
@@ -31,25 +42,46 @@ public class WikipediaParser {
                 if (cells.size() < 5) {
                     continue;
                 }
-                //System.out.println(cells);
                 String title = cells.get(0).text();
-                String company = cells.get(1).text();
-                resolvePeopleRoles(cells.get(2));
+                List<String> companies = parseCellText(cells.get(1).text(), "/");
+                PeopleRoles peopleRoles = resolvePeopleRoles(cells.get(2));
+                if (peopleRoles == null) {
+                    continue;
+                }
+                List<String> genres = parseCellText(cells.get(3).text(), ",");
+                List<String> countries = parseCellText(cells.get(4).text(), ",");
 
-//                MovieData movieData = MovieData.builder()
-//                    .build();
-
+                MovieData movieData = MovieData.builder()
+                        .title(title)
+                        .companies(companies)
+                        .peopleRoles(peopleRoles)
+                        .genres(genres)
+                        .countries(countries)
+                        .build();
+                movies.add(movieData);
             }
         }
+
+        return movies;
     }
 
-    private static void resolvePeopleRoles(Element cell) {
+    private static List<String> parseCellText(String cellText, String separator) {
+       return Arrays.asList(cellText.split(separator))
+               .stream()
+               .map(item -> item.trim())
+               .collect(Collectors.toList());
+    }
+
+    private static PeopleRoles resolvePeopleRoles(Element cell) {
         String cellInfo = cell.text();
+        if (cellInfo.charAt(cellInfo.length() - 1) == ';') {
+            cellInfo = cellInfo.substring(0, cellInfo.length() - 1);
+        }
         int lastSeparator = cellInfo.lastIndexOf(";");
         if (lastSeparator == -1) {
-            return;
+            return null;
         }
-        List<String> actors = Arrays.asList(cellInfo.substring(lastSeparator+1).split(","));
+        List<String> actors = parseCellText(cellInfo.substring(lastSeparator + 1), ",");
         String[] directorsAndScreenPlayers = cellInfo.substring(0, lastSeparator).split("[,;]");
         List<String> directors = new ArrayList<>();
         List<String> screenwriters = new ArrayList<>();
@@ -70,7 +102,7 @@ public class WikipediaParser {
                 }
             }
             for (String currentRole : currentRoles) {
-                if (currentRole.startsWith("director") || currentRole.equals("co-director")) {
+                if (currentRole.startsWith("director") || currentRole.endsWith("director")) {
                     directors.add(name);
                 }
                 if (currentRole.equals("screenplay")) {
@@ -80,10 +112,13 @@ public class WikipediaParser {
             currentPersonIndex--;
         }
 
-        System.out.println("Directors: ");
-        System.out.println(directors);
-        System.out.println("Screenwriters");
-        System.out.println(screenwriters);
+        PeopleRoles peopleRoles = PeopleRoles.builder()
+                    .actors(actors)
+                    .directors(directors)
+                    .screenwriters(screenwriters)
+                    .build();
+
+        return peopleRoles;
 
     }
 }
