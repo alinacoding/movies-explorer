@@ -5,6 +5,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -28,9 +29,11 @@ public class WikipediaParser {
         });
     }
 
-    private static List<MovieData> getMoviesForYear(int year) throws IOException{
+    public static List<MovieData> getMoviesForYear(int year) throws IOException {
         List<MovieData> movies = new ArrayList<>();
-        Document doc = Jsoup.connect("https://en.wikipedia.org/wiki/" + year + "_in_film").get();
+        //Document doc = Jsoup.connect("https://en.wikipedia.org/wiki/" + year + "_in_film").get();
+        File input = new File("temp/" + year + ".html");
+        Document doc = Jsoup.parse(input, "UTF-8");
         Elements wikiTables = doc.select("table.wikitable").not(".sortable").not("[style]");
         for (Element wikiTable : wikiTables) {
             Elements tableRows = wikiTable.children().select("tr");
@@ -42,7 +45,7 @@ public class WikipediaParser {
                 if (cells.size() < 5) {
                     continue;
                 }
-                String title = cells.get(0).text();
+                String title = cells.get(0).text().replaceAll("\\p{P}", "");
                 List<String> companies = parseCellText(cells.get(1).text(), "/");
                 PeopleRoles peopleRoles = resolvePeopleRoles(cells.get(2));
                 if (peopleRoles == null) {
@@ -69,6 +72,7 @@ public class WikipediaParser {
        return Arrays.asList(cellText.split(separator))
                .stream()
                .map(item -> item.trim())
+               .map(item -> item.replaceAll("'", "\'"))
                .collect(Collectors.toList());
     }
 
@@ -82,15 +86,17 @@ public class WikipediaParser {
             return null;
         }
         List<String> actors = parseCellText(cellInfo.substring(lastSeparator + 1), ",");
-        String[] directorsAndScreenPlayers = cellInfo.substring(0, lastSeparator).split("[,;]");
+
+        List<String> directorsAndScreenwriters = parseCellText(cellInfo.substring(0, lastSeparator), "[,;]");
+
         List<String> directors = new ArrayList<>();
         List<String> screenwriters = new ArrayList<>();
 
         Pattern regex = Pattern.compile("\\((.*?)\\)");
         List<String> currentRoles = new ArrayList<>();
-        int currentPersonIndex = directorsAndScreenPlayers.length - 1;
+        int currentPersonIndex = directorsAndScreenwriters.size() - 1;
         while (currentPersonIndex >= 0) {
-            String nameAndRole = directorsAndScreenPlayers[currentPersonIndex];
+            String nameAndRole = directorsAndScreenwriters.get(currentPersonIndex);
             String name = nameAndRole.split("\\(")[0].trim();
             Matcher matcher = regex.matcher(nameAndRole);
             if (matcher.find()) {
