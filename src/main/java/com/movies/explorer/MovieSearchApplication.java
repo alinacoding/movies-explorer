@@ -31,7 +31,7 @@ public class MovieSearchApplication extends Application<Configuration> {
             int year = 2018;
             List<MovieData> movies = WikipediaParser.getMoviesForYear(year);
             Connection connection = MovieDatabase.populateDatabase(year, movies);
-            return new MovieSearchResource(okHttpClient, connection);
+            return new MovieSearchResource(okHttpClient);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

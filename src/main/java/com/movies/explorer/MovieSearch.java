@@ -5,20 +5,36 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import org.immutables.value.Value;
 
+import java.util.Optional;
+
 @Value.Immutable
 @JsonSerialize(as = com.movies.explorer.ImmutableMovieSearch.class)
 @JsonDeserialize(as = com.movies.explorer.ImmutableMovieSearch.class)
 public interface MovieSearch {
 
-    @JsonProperty("from") int fromYear();
-    @JsonProperty("to") int toYear();
-    @JsonProperty("company") String company();
-    @JsonProperty("genre") String genre();
-    @JsonProperty("director") String director();
-    @JsonProperty("screenwriter") String screenwriter();
-    @JsonProperty("actor") String actor();
-    @JsonProperty("country") String country();
+    @JsonProperty("fromYear")
+    Optional<Integer> fromYear();
 
+    @JsonProperty("toYear")
+    Optional<Integer> toYear();
+
+    @JsonProperty("company")
+    Optional<String> company();
+
+    @JsonProperty("genre")
+    Optional<String> genre();
+
+    @JsonProperty("director")
+    Optional<String> director();
+
+    @JsonProperty("screenwriter")
+    Optional<String> screenwriter();
+
+    @JsonProperty("actor")
+    Optional<String> actor();
+
+    @JsonProperty("country")
+    Optional<String> country();
 
     class Builder extends com.movies.explorer.ImmutableMovieSearch.Builder {}
 
