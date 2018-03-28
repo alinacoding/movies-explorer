@@ -13,7 +13,7 @@ repositories {
      mavenCentral()
 }
 
-mainClassName = 'com.movies.explorer.WikipediaParser'
+mainClassName = 'com.movies.explorer.MovieSearchApplication'
 
 jar {
     manifest {

@@ -4,13 +4,17 @@ import java.io.IOException;
 import java.sql.*;
 import java.util.List;
 
-public class ConnectDatabase {
+public class MovieDatabase {
 
     public static void main(String[] args) throws IOException {
 
         int year = 2018;
         List<MovieData> movies = WikipediaParser.getMoviesForYear(year);
         System.out.println(movies.size());
+        Connection connection = populateDatabase(year, movies);
+    }
+
+    public static Connection populateDatabase(int year, List<MovieData> movies) {
         try {
             Class.forName("org.hsqldb.jdbc.JDBCDriver");
             Connection connection = DriverManager.getConnection("jdbc:hsqldb:mem:aname", "sa", "");
@@ -48,13 +52,12 @@ public class ConnectDatabase {
                 }
             });
 
-            ResultSet resSet = statement.executeQuery("SELECT * FROM moviedb");
-            while (resSet.next()) {
-                System.out.println(resSet.getString("title") + " " + resSet.getInt("year"));
-            }
+            return connection;
+
         } catch (Exception e) {
             e.printStackTrace(System.out);
         }
+        return null;
     }
 
     private static Array sqlArrayOf(Connection connection, List<String> list) {
