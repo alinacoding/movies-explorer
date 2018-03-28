@@ -2,7 +2,6 @@ package com.movies.explorer;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.SQLException;
 import java.util.function.Supplier;
 
 public class ConnectionSupplier implements Supplier<Connection> {
