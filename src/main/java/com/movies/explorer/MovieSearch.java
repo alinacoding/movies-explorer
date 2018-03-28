@@ -12,11 +12,13 @@ import java.util.Optional;
 @JsonDeserialize(as = com.movies.explorer.ImmutableMovieSearch.class)
 public interface MovieSearch {
 
-    @JsonProperty("fromYear")
     Optional<Integer> fromYear();
 
     @JsonProperty("toYear")
     Optional<Integer> toYear();
+
+    @JsonProperty("title")
+    Optional<String> title();
 
     @JsonProperty("company")
     Optional<String> company();
@@ -36,7 +38,8 @@ public interface MovieSearch {
     @JsonProperty("country")
     Optional<String> country();
 
-    class Builder extends com.movies.explorer.ImmutableMovieSearch.Builder {}
+    class Builder extends com.movies.explorer.ImmutableMovieSearch.Builder {
+    }
 
     static MovieSearch.Builder builder() {
         return new Builder();

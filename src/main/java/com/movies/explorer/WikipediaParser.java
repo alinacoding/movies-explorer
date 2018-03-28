@@ -16,8 +16,10 @@ import java.util.stream.Collectors;
 
 public class WikipediaParser {
 
+    private static final int YEAR = 2018;
+
     public static void main(String[] args) throws IOException {
-        List<MovieData> movies = getMoviesForYear(2018);
+        List<MovieData> movies = getMovies();
         movies.forEach(movie -> {
             System.out.println(movie.title());
             System.out.println(movie.companies());
@@ -30,11 +32,10 @@ public class WikipediaParser {
         System.out.println(movies.size());
     }
 
-    public static List<MovieData> getMoviesForYear(int year) throws IOException {
+    public static List<MovieData> getMovies() {
         List<MovieData> movies = new ArrayList<>();
-        //Document doc = Jsoup.connect("https://en.wikipedia.org/wiki/" + year + "_in_film").get();
-        File input = new File("temp/" + year + ".html");
-        Document doc = Jsoup.parse(input, "UTF-8");
+        Document doc = getDocument(YEAR);
+
         Elements wikiTables = doc.select("table.wikitable").not(".sortable").not("[style]");
         for (Element wikiTable : wikiTables) {
             Elements tableRows = wikiTable.children().select("tr");
@@ -55,6 +56,7 @@ public class WikipediaParser {
                 }
                 MovieData movieData = MovieData.builder()
                         .title(title)
+                        .year(YEAR)
                         .companies(companies)
                         .peopleRoles(peopleRoles)
                         .genres(genres)
@@ -65,6 +67,16 @@ public class WikipediaParser {
         }
 
         return movies;
+    }
+
+    private static Document getDocument(int year) {
+        //Document doc = Jsoup.connect("https://en.wikipedia.org/wiki/" + year + "_in_film").get();
+        File input = new File("temp/" + year + ".html");
+        try {
+            return Jsoup.parse(input, "UTF-8");
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private static List<String> parseCellText(String cellText, String separator) {
