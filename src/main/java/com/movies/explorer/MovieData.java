@@ -12,7 +12,7 @@ public interface MovieData {
     List<String> genres();
     List<String> countries();
 
-    class Builder extends ImmutableMovieData.Builder {}
+    class Builder extends com.movies.explorer.ImmutableMovieData.Builder {}
 
     static Builder builder() {
         return new Builder();

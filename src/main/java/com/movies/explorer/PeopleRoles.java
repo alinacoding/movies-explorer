@@ -10,7 +10,7 @@ public interface PeopleRoles {
     List<String> screenwriters();
     List<String> actors();
 
-    class Builder extends ImmutablePeopleRoles.Builder {}
+    class Builder extends com.movies.explorer.ImmutablePeopleRoles.Builder {}
 
     static Builder builder() {
         return new Builder();

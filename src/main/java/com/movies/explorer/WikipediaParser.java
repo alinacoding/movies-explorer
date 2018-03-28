@@ -27,6 +27,7 @@ public class WikipediaParser {
             System.out.println(movie.countries());
             System.out.println(movie.genres());
         });
+        System.out.println(movies.size());
     }
 
     public static List<MovieData> getMoviesForYear(int year) throws IOException {
@@ -40,20 +41,18 @@ public class WikipediaParser {
             tableRows.remove(0);
             for (Element tableRow : tableRows) {
                 Elements cells = tableRow.children().select("td");
-                cells.remove(cells.first());
-                cells.remove(cells.last());
-                if (cells.size() < 5) {
-                    continue;
+                if ((cells.first().select("[rowspan]").size() > 0) || (cells.first().select("[style]").size() > 0)) {
+                    cells.remove(cells.first());
                 }
+                cells.remove(cells.last());
                 String title = cells.get(0).text().replaceAll("\\p{P}", "");
                 List<String> companies = parseCellText(cells.get(1).text(), "/");
                 PeopleRoles peopleRoles = resolvePeopleRoles(cells.get(2));
-                if (peopleRoles == null) {
+                List<String> genres = parseCellText(cells.get(3).text(), "\\s*(,|\\s)\\s*");
+                List<String> countries = parseCellText(cells.get(4).text(), ",");
+                if (title == null || title.isEmpty() || companies == null || peopleRoles == null || genres == null || countries == null) {
                     continue;
                 }
-                List<String> genres = parseCellText(cells.get(3).text(), ",");
-                List<String> countries = parseCellText(cells.get(4).text(), ",");
-
                 MovieData movieData = MovieData.builder()
                         .title(title)
                         .companies(companies)
@@ -69,24 +68,31 @@ public class WikipediaParser {
     }
 
     private static List<String> parseCellText(String cellText, String separator) {
+        if (cellText == null || cellText.isEmpty()) {
+            return null;
+        }
        return Arrays.asList(cellText.split(separator))
                .stream()
                .map(item -> item.trim())
-               .map(item -> item.replaceAll("'", "\'"))
                .collect(Collectors.toList());
     }
 
     private static PeopleRoles resolvePeopleRoles(Element cell) {
         String cellInfo = cell.text();
+        if (cellInfo == null || cellInfo.isEmpty()) {
+            return null;
+        }
+
         if (cellInfo.charAt(cellInfo.length() - 1) == ';') {
             cellInfo = cellInfo.substring(0, cellInfo.length() - 1);
         }
+
         int lastSeparator = cellInfo.lastIndexOf(";");
         if (lastSeparator == -1) {
             return null;
         }
-        List<String> actors = parseCellText(cellInfo.substring(lastSeparator + 1), ",");
 
+        List<String> actors = parseCellText(cellInfo.substring(lastSeparator + 1), ",");
         List<String> directorsAndScreenwriters = parseCellText(cellInfo.substring(0, lastSeparator), "[,;]");
 
         List<String> directors = new ArrayList<>();

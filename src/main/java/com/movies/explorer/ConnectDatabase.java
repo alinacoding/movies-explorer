@@ -2,10 +2,7 @@ package com.movies.explorer;
 
 import java.io.IOException;
 import java.sql.*;
-
 import java.util.List;
-import java.util.stream.Collectors;
-
 
 public class ConnectDatabase {
 
@@ -13,6 +10,7 @@ public class ConnectDatabase {
 
         int year = 2018;
         List<MovieData> movies = WikipediaParser.getMoviesForYear(year);
+        System.out.println(movies.size());
         try {
             Class.forName("org.hsqldb.jdbc.JDBCDriver");
             Connection connection = DriverManager.getConnection("jdbc:hsqldb:mem:aname", "sa", "");
@@ -26,7 +24,7 @@ public class ConnectDatabase {
                     "screenwriters NVARCHAR(50) ARRAY NOT NULL, " +
                     "actors NVARCHAR(50) ARRAY NOT NULL, " +
                     "genres NVARCHAR(20) ARRAY NOT NULL, " +
-                    "countries NVARCHAR(3) ARRAY NOT NULL, " +
+                    "countries NVARCHAR(20) ARRAY NOT NULL, " +
                     "PRIMARY KEY(title)" +
                     ");";
             statement.executeUpdate(CREATE_DB);
