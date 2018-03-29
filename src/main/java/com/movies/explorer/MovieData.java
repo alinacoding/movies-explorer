@@ -2,9 +2,10 @@ package com.movies.explorer;
 
 import java.util.List;
 
+import org.immutables.value.Value;
+
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import org.immutables.value.Value;
 
 @Value.Immutable
 @JsonSerialize(as = com.movies.explorer.ImmutableMovieData.class)
@@ -23,8 +24,7 @@ public interface MovieData {
 
     List<String> countries();
 
-    class Builder extends com.movies.explorer.ImmutableMovieData.Builder {
-    }
+    class Builder extends com.movies.explorer.ImmutableMovieData.Builder {}
 
     static Builder builder() {
         return new Builder();

@@ -1,13 +1,12 @@
 package com.movies.explorer;
 
-import io.dropwizard.Application;
-import io.dropwizard.Configuration;
-import io.dropwizard.setup.Environment;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import java.sql.Connection;
 import java.util.List;
 import java.util.function.Supplier;
+
+import io.dropwizard.Application;
+import io.dropwizard.Configuration;
+import io.dropwizard.setup.Environment;
 
 public class MovieSearchApplication extends Application<Configuration> {
 

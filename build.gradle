@@ -4,7 +4,7 @@ plugins {
 
 apply plugin: 'application'
 apply plugin: 'idea'
-
+apply plugin: 'eclipse'
 
 sourceCompatibility = 9
 targetCompatibility = 9

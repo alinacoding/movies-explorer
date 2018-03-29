@@ -2,6 +2,11 @@
 *.iml
 *.ipr
 *.iws
+.classpath
+.factorypath
+.project
+.settings
+bin
 
 .gradle
 
@@ -31,3 +36,4 @@ build
 logs
 temp
 generated_src
+/generated/

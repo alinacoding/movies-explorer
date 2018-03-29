@@ -11,6 +11,7 @@ import java.util.Optional;
 @JsonDeserialize(as = com.movies.explorer.ImmutableMovieSearch.class)
 public interface MovieSearch {
 
+    @JsonProperty("fromYear")
     Optional<Integer> fromYear();
 
     @JsonProperty("toYear")

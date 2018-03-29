@@ -1,11 +1,11 @@
 package com.movies.explorer;
 
+import java.util.List;
+
+import org.immutables.value.Value;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import org.immutables.value.Value;
-
-import java.util.List;
 
 @Value.Immutable
 @JsonSerialize(as = com.movies.explorer.ImmutableMovieSearchResult.class)
@@ -13,13 +13,10 @@ import java.util.List;
 public interface MovieSearchResult {
     List<MovieData> movies();
 
-    class Builder extends com.movies.explorer.ImmutableMovieSearchResult.Builder {
-    }
+    class Builder extends com.movies.explorer.ImmutableMovieSearchResult.Builder {}
 
     static Builder builder() {
         return new Builder();
     }
-
-
 
 }
