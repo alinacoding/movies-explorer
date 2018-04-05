@@ -22,6 +22,10 @@ import org.jsoup.select.Elements;
 import com.google.common.collect.Sets;
 
 public class WikipediaMovieParser {
+    public static void main(String[] args) throws IOException {
+        MovieData movieData = parseMovieData("https://en.wikipedia.org/wiki/New_York_Stories", "");
+
+    }
 
     public static MovieData parseMovieData(String movieUrl, String title) throws IOException {
         Document doc = Jsoup.connect(movieUrl).get();
@@ -48,13 +52,15 @@ public class WikipediaMovieParser {
                 .collect(Collectors.toMap(
                         tableRow -> tableRow.children().select("th").text().trim(),
                         tableRow -> tableRow));
-        List<String> categoriesOfInterest = Arrays.asList("Directed by", "Country",
-                "Starring", "Written by", "Screenplay by", "Starring");
+        Set<String> categoriesOfInterest = Sets.newHashSet("Directed by", "Country",
+                "Starring", "Written by", "Screenplay by", "Starring", "Production company",
+                "Distributed by");
         Map<String, Element> filteredCategoryToElement = categoryToHtmlElement.entrySet()
                 .stream()
                 .filter(entry -> categoriesOfInterest.contains(entry.getKey()))
                 .collect(Collectors.toMap(entry -> entry.getKey(),
                         entry -> entry.getValue()));
+
         Set<String> countries = Optional.ofNullable(filteredCategoryToElement.get("Country"))
                 .map(WikipediaMovieParser::getCountries)
                 .orElse(emptySet());
@@ -63,11 +69,16 @@ public class WikipediaMovieParser {
 
         PeopleRoles peopleRoles = resolvePeopleRoles(filteredCategoryToElement, imdbParser);
 
+        Set<String> companies = Sets.union(
+                getProductionCompany(filteredCategoryToElement),
+                getDistributedBy(filteredCategoryToElement));
+
         MovieData movieData = MovieData.builder()
                 .title(title)
                 .year(2018)
                 .peopleRoles(peopleRoles)
                 .genres(genres)
+                .companies(companies)
                 .countries(countries)
                 .build();
 
@@ -97,6 +108,24 @@ public class WikipediaMovieParser {
 
         return peopleRoles;
 
+    }
+
+    private static Set<String> getDistributedBy(Map<String, Element> filteredCategoryToElement) {
+        return Optional.ofNullable(filteredCategoryToElement.get("Distributed by"))
+                .map(aTag -> aTag.select("a")
+                        .stream()
+                        .map(a -> a.text())
+                        .collect(toSet()))
+                .orElse(emptySet());
+    }
+
+    private static Set<String> getProductionCompany(Map<String, Element> filteredCategoryToElement) {
+        return Optional.ofNullable(filteredCategoryToElement.get("Production company"))
+                .map(element -> element.select("a")
+                        .stream()
+                        .map(aTag -> aTag.text())
+                        .collect(toSet()))
+                .orElse(emptySet());
     }
 
     private static Set<String> getWrittenBy(Map<String, Element> filteredCategoryToElement) {
@@ -136,9 +165,9 @@ public class WikipediaMovieParser {
                 element.select("td")
                         .html()
                         .split("<[^>]*>"))
-                .filter(person -> person != null
-                        && person.trim().length() > 0)
-                .map(person -> person.trim())
+                .filter(item -> item != null
+                        && item.trim().length() > 0)
+                .map(item -> item.trim())
                 .collect(toSet()));
         return items;
     }

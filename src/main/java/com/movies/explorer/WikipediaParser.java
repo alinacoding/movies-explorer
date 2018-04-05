@@ -31,7 +31,6 @@ public class WikipediaParser {
         Document doc = Jsoup.connect("https://en.wikipedia.org/wiki/2000_in_film").get();
         Elements wikiTables = doc.select("table.wikitable");
         int numTables = wikiTables.size();
-        System.out.println(numTables);
         for (int tableIndex = numTables - 1; tableIndex >= numTables - 4; tableIndex--) {
             Element wikiTable = wikiTables.get(tableIndex);
             Elements tableRows = wikiTable.children().select("tr");
@@ -47,9 +46,7 @@ public class WikipediaParser {
                 }
                 String title = cells.get(0).text().replaceAll("\\p{P}", "");
                 System.out.println(title);
-                System.out.println(endpoint);
                 String movieUrl = "https://en.wikipedia.org" + endpoint;
-                System.out.println(movieUrl);
                 MovieData movieData = WikipediaMovieParser.parseMovieData(movieUrl, title);
                 movies.add(movieData);
             }
