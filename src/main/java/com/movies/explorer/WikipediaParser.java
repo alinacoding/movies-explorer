@@ -11,8 +11,6 @@ import org.jsoup.select.Elements;
 
 public class WikipediaParser {
 
-    private static final int YEAR = 2018;
-
     public static void main(String[] args) throws IOException {
 
         Set<MovieData> movies = getMovies();
@@ -52,7 +50,7 @@ public class WikipediaParser {
                 System.out.println(endpoint);
                 String movieUrl = "https://en.wikipedia.org" + endpoint;
                 System.out.println(movieUrl);
-                MovieData movieData = MovieParser.parseMovieData(movieUrl, title);
+                MovieData movieData = WikipediaMovieParser.parseMovieData(movieUrl, title);
                 movies.add(movieData);
             }
         }

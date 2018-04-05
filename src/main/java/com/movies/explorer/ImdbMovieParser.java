@@ -8,11 +8,11 @@ import java.util.Set;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
-public class ImdbParser {
+public class ImdbMovieParser {
 
     private final Document imdbDoc;
 
-    public ImdbParser(String imdbUrl) {
+    public ImdbMovieParser(String imdbUrl) {
         this.imdbDoc = getDocument(imdbUrl);
     }
 
