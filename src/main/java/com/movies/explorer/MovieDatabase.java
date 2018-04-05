@@ -8,7 +8,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -34,12 +36,12 @@ public class MovieDatabase {
         this.connectionSupplier = connectionSupplier;
     }
 
-    public void populateDatabase(List<MovieData> movies) {
+    public void populateDatabase(Set<MovieData> movies) {
         createTable();
         insertMovieData(movies);
     }
 
-    private void insertMovieData(List<MovieData> movies) {
+    private void insertMovieData(Set<MovieData> movies) {
         try (Connection connection = connectionSupplier.get();
                 PreparedStatement preparedStatement = connection.prepareStatement(INSERT_RECORD)) {
             movies.forEach(movie -> insertRow(connection, preparedStatement, movie));
@@ -200,7 +202,7 @@ public class MovieDatabase {
         }
     }
 
-    private static Array sqlArrayOf(Connection connection, List<String> list) {
+    private static Array sqlArrayOf(Connection connection, Collection<String> list) {
         Object[] array = list.toArray(new Object[0]);
         try {
             return connection.createArrayOf("NVARCHAR", array);

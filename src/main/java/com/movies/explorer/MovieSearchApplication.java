@@ -1,7 +1,8 @@
 package com.movies.explorer;
 
+import java.io.IOException;
 import java.sql.Connection;
-import java.util.List;
+import java.util.Set;
 import java.util.function.Supplier;
 
 import io.dropwizard.Application;
@@ -15,10 +16,10 @@ public class MovieSearchApplication extends Application<Configuration> {
     }
 
     @Override
-    public void run(Configuration configuration, Environment environment) {
+    public void run(Configuration configuration, Environment environment) throws IOException {
         Supplier<Connection> connectionSupplier = new ConnectionSupplier();
         MovieDatabase movieDatabase = new MovieDatabase(connectionSupplier);
-        List<MovieData> movies = WikipediaParser.getMovies();
+        Set<MovieData> movies = WikipediaParser.getMovies();
         movieDatabase.populateDatabase(movies);
         MovieSearchResource movieSearchResource = new MovieSearchResource(movieDatabase);
         environment.jersey().register(movieSearchResource);

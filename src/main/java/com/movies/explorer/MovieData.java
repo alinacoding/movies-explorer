@@ -1,6 +1,6 @@
 package com.movies.explorer;
 
-import java.util.List;
+import java.util.Set;
 
 import org.immutables.value.Value;
 
@@ -16,13 +16,13 @@ public interface MovieData {
 
     int year();
 
-    List<String> companies();
+    Set<String> companies();
 
     PeopleRoles peopleRoles();
 
-    List<String> genres();
+    Set<String> genres();
 
-    List<String> countries();
+    Set<String> countries();
 
     class Builder extends com.movies.explorer.ImmutableMovieData.Builder {}
 

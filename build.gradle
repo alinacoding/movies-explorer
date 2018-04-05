@@ -3,7 +3,6 @@ plugins {
 }
 
 apply plugin: 'application'
-apply plugin: 'idea'
 apply plugin: 'eclipse'
 
 sourceCompatibility = 9
@@ -13,7 +12,7 @@ repositories {
      mavenCentral()
 }
 
-mainClassName = 'com.movies.explorer.MovieSearchApplication'
+mainClassName = 'com.movies.explorer.WikipediaParser'
 
 jar {
     manifest {
@@ -27,6 +26,8 @@ jar {
 applicationDefaultJvmArgs = ["--add-modules", "java.xml.bind"]
 
 dependencies {
+	compile group: 'com.google.guava', name: 'guava', version: '24.1-jre'
+	compile group: 'commons-io', name: 'commons-io', version: '2.6'
 	processor 'org.immutables:value:2.5.6'
 	compile group: 'com.squareup.okhttp', name: 'okhttp', version: '2.7.5'
 	implementation 'com.squareup.okhttp3:okhttp:3.10.0'

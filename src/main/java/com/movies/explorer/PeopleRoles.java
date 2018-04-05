@@ -1,24 +1,24 @@
 package com.movies.explorer;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import java.util.Set;
+
 import org.immutables.value.Value;
 
-import java.util.List;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 @Value.Immutable
 @JsonSerialize(as = com.movies.explorer.ImmutablePeopleRoles.class)
 @JsonDeserialize(as = com.movies.explorer.ImmutablePeopleRoles.class)
 public interface PeopleRoles {
 
-    List<String> directors();
+    Set<String> directors();
 
-    List<String> screenwriters();
+    Set<String> screenwriters();
 
-    List<String> actors();
+    Set<String> actors();
 
-    class Builder extends com.movies.explorer.ImmutablePeopleRoles.Builder {
-    }
+    class Builder extends com.movies.explorer.ImmutablePeopleRoles.Builder {}
 
     static Builder builder() {
         return new Builder();
