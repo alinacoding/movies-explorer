@@ -1,6 +1,6 @@
 package com.movies.explorer;
 
-import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
 
 import java.sql.Array;
 import java.sql.Connection;
@@ -9,26 +9,27 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Collection;
-import java.util.List;
 import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 public class MovieDatabase {
 
-    private static final String CREATE_TABLE = "CREATE TABLE moviedb (" +
-            "title NVARCHAR(100) NOT NULL, " +
-            "year INT NOT NULL, " +
-            "companies NVARCHAR(50) ARRAY NOT NULL, " +
-            "directors NVARCHAR(50) ARRAY NOT NULL, " +
-            "screenwriters NVARCHAR(50) ARRAY NOT NULL, " +
-            "actors NVARCHAR(50) ARRAY NOT NULL, " +
-            "genres NVARCHAR(20) ARRAY NOT NULL, " +
-            "countries NVARCHAR(20) ARRAY NOT NULL, " +
-            "PRIMARY KEY(title)" +
+    private static final String DROP_TABLE = "DROP TABLE IF EXISTS movies;";
+
+    private static final String CREATE_TABLE = "CREATE TABLE movies (" +
+            "title VARCHAR(100) NOT NULL, " +
+            "year INTEGER NOT NULL, " +
+            "companies VARCHAR ARRAY[50], " +
+            "directors VARCHAR ARRAY[50], " +
+            "screenwriters VARCHAR ARRAY[50], " +
+            "actors VARCHAR ARRAY[50], " +
+            "genres VARCHAR ARRAY[20], " +
+            "countries VARCHAR ARRAY[20], " +
+            "PRIMARY KEY(title, year)" +
             ");";
 
-    private static final String INSERT_RECORD = "INSERT INTO moviedb VALUES (?,?,?,?,?,?,?,?)";
+    private static final String INSERT_RECORD = "INSERT INTO movies VALUES (?,?,?,?,?,?,?,?)";
 
     private final Supplier<Connection> connectionSupplier;
 
@@ -53,6 +54,7 @@ public class MovieDatabase {
     private void createTable() {
         try (Connection connection = connectionSupplier.get();
                 Statement statement = connection.createStatement()) {
+            statement.executeUpdate(DROP_TABLE);
             statement.executeUpdate(CREATE_TABLE);
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -77,7 +79,7 @@ public class MovieDatabase {
 
     private String buildQueryFromSearchFields(MovieSearch movieSearch) {
         StringBuilder query = new StringBuilder();
-        query.append("SELECT * FROM moviedb WHERE ");
+        query.append("SELECT * FROM movies WHERE ");
 
         movieSearch.title().ifPresent(title -> {
             query.append("title = ? AND ");
@@ -92,27 +94,27 @@ public class MovieDatabase {
         });
 
         movieSearch.company().ifPresent(company -> {
-            query.append("POSITION_ARRAY(? IN companies) > 0 AND ");
+            query.append("? = ANY(companies) AND ");
         });
 
         movieSearch.director().ifPresent(director -> {
-            query.append("POSITION_ARRAY(? IN directors) > 0 AND ");
+            query.append("? = ANY(directors) AND ");
         });
 
         movieSearch.screenwriter().ifPresent(screenwriter -> {
-            query.append("POSITION_ARRAY(? IN screenwriters) > 0 AND ");
+            query.append("? = ANY(screenwriters) AND ");
         });
 
         movieSearch.actor().ifPresent(actor -> {
-            query.append("POSITION_ARRAY(? IN actors) > 0 AND ");
+            query.append("? = ANY(actors) AND ");
         });
 
         movieSearch.genre().ifPresent(genre -> {
-            query.append("POSITION_ARRAY(? IN genres) > 0 AND ");
+            query.append("? = ANY(genres) AND ");
         });
 
         movieSearch.country().ifPresent(country -> {
-            query.append("POSITION_ARRAY(? IN countries) > 0 AND ");
+            query.append("? = ANY(countries) AND ");
         });
         query.append("TRUE;");
 
@@ -193,19 +195,19 @@ public class MovieDatabase {
         }
     }
 
-    private static List<String> sqlArrayToList(Array sqlArray) {
+    private static Set<String> sqlArrayToList(Array sqlArray) {
         try {
             Object[] strArray = (Object[]) sqlArray.getArray();
-            return Stream.of(strArray).map(Object::toString).collect(toList());
+            return Stream.of(strArray).map(Object::toString).collect(toSet());
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private static Array sqlArrayOf(Connection connection, Collection<String> list) {
-        Object[] array = list.toArray(new Object[0]);
+    private static Array sqlArrayOf(Connection connection, Collection<String> collection) {
+        Object[] array = collection.toArray(new Object[0]);
         try {
-            return connection.createArrayOf("NVARCHAR", array);
+            return connection.createArrayOf("VARCHAR", array);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }

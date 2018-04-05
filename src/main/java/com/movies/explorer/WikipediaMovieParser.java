@@ -22,10 +22,6 @@ import org.jsoup.select.Elements;
 import com.google.common.collect.Sets;
 
 public class WikipediaMovieParser {
-    public static void main(String[] args) throws IOException {
-        MovieData movieData = parseMovieData("https://en.wikipedia.org/wiki/New_York_Stories", "");
-
-    }
 
     public static MovieData parseMovieData(String movieUrl, String title) throws IOException {
         Document doc = Jsoup.connect(movieUrl).get();

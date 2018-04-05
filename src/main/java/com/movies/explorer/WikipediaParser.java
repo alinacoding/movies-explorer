@@ -49,6 +49,7 @@ public class WikipediaParser {
                 String movieUrl = "https://en.wikipedia.org" + endpoint;
                 MovieData movieData = WikipediaMovieParser.parseMovieData(movieUrl, title);
                 movies.add(movieData);
+                break;
             }
         }
         return movies;
