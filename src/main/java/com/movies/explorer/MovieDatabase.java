@@ -17,15 +17,17 @@ public class MovieDatabase {
 
     private static final String DROP_TABLE = "DROP TABLE IF EXISTS movies;";
 
+    private static final String ENABLE_CITEXT = "CREATE EXTENSION IF NOT EXISTS citext WITH SCHEMA public;";
+
     private static final String CREATE_TABLE = "CREATE TABLE movies (" +
-            "title VARCHAR(100) NOT NULL, " +
+            "title CITEXT NOT NULL, " +
             "year INTEGER NOT NULL, " +
-            "companies VARCHAR ARRAY[50], " +
-            "directors VARCHAR ARRAY[50], " +
-            "screenwriters VARCHAR ARRAY[50], " +
-            "actors VARCHAR ARRAY[50], " +
-            "genres VARCHAR ARRAY[20], " +
-            "countries VARCHAR ARRAY[20], " +
+            "companies CITEXT[], " +
+            "directors CITEXT[], " +
+            "screenwriters CITEXT[], " +
+            "actors CITEXT[], " +
+            "genres CITEXT[], " +
+            "countries CITEXT[], " +
             "PRIMARY KEY(title, year)" +
             ");";
 
@@ -55,6 +57,7 @@ public class MovieDatabase {
         try (Connection connection = connectionSupplier.get();
                 Statement statement = connection.createStatement()) {
             statement.executeUpdate(DROP_TABLE);
+            statement.executeUpdate(ENABLE_CITEXT);
             statement.executeUpdate(CREATE_TABLE);
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -77,12 +80,17 @@ public class MovieDatabase {
         }
     }
 
+    private String partialSearchInArrayQuery(String field) {
+        return "(EXISTS (SELECT * FROM UNNEST(" + field + ") "
+                + "AS unnested(item) WHERE unnested.item like '%' || ? || '%')) AND ";
+    }
+
     private String buildQueryFromSearchFields(MovieSearch movieSearch) {
         StringBuilder query = new StringBuilder();
         query.append("SELECT * FROM movies WHERE ");
 
         movieSearch.title().ifPresent(title -> {
-            query.append("title = ? AND ");
+            query.append("title LIKE '%' || ? || '%' AND ");
         });
 
         movieSearch.fromYear().ifPresent(fromYear -> {
@@ -94,27 +102,27 @@ public class MovieDatabase {
         });
 
         movieSearch.company().ifPresent(company -> {
-            query.append("? = ANY(companies) AND ");
+            query.append(partialSearchInArrayQuery("companies"));
         });
 
         movieSearch.director().ifPresent(director -> {
-            query.append("? = ANY(directors) AND ");
+            query.append(partialSearchInArrayQuery("directors"));
         });
 
         movieSearch.screenwriter().ifPresent(screenwriter -> {
-            query.append("? = ANY(screenwriters) AND ");
+            query.append(partialSearchInArrayQuery("screenwriters"));
         });
 
         movieSearch.actor().ifPresent(actor -> {
-            query.append("? = ANY(actors) AND ");
+            query.append(partialSearchInArrayQuery("actors"));
         });
 
         movieSearch.genre().ifPresent(genre -> {
-            query.append("? = ANY(genres) AND ");
+            query.append(partialSearchInArrayQuery("genres"));
         });
 
         movieSearch.country().ifPresent(country -> {
-            query.append("? = ANY(countries) AND ");
+            query.append(partialSearchInArrayQuery("countries"));
         });
         query.append("TRUE;");
 
