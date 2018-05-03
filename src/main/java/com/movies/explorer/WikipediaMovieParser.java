@@ -5,6 +5,7 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
 import java.io.IOException;
+import java.sql.Connection;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -12,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import org.jsoup.Jsoup;
@@ -23,13 +25,8 @@ import com.google.common.collect.Sets;
 
 public class WikipediaMovieParser {
 
-    public static MovieData parseMovieData(String movieUrl, String title) throws IOException {
+    public static MovieData parseMovieData(String movieUrl, String title, int year) throws IOException {
         Document doc = Jsoup.connect(movieUrl).get();
-        Elements externalLinks = doc.select("h2 ~ ul").last().select("li a[href~=https://www.imdb.com]");
-        System.out.println(externalLinks);
-        String imdbUrl = externalLinks.first().attr("href");
-        System.out.println(imdbUrl);
-        ImdbMovieParser imdbParser = new ImdbMovieParser(imdbUrl);
 
         Elements tableRows = doc.select("table.infobox").first().children().select("tr");
 
@@ -51,6 +48,7 @@ public class WikipediaMovieParser {
         Set<String> categoriesOfInterest = Sets.newHashSet("Directed by", "Country",
                 "Starring", "Written by", "Screenplay by", "Starring", "Production company",
                 "Distributed by");
+
         Map<String, Element> filteredCategoryToElement = categoryToHtmlElement.entrySet()
                 .stream()
                 .filter(entry -> categoriesOfInterest.contains(entry.getKey()))
@@ -61,28 +59,9 @@ public class WikipediaMovieParser {
                 .map(WikipediaMovieParser::getCountries)
                 .orElse(emptySet());
 
-        Set<String> genres = imdbParser.getGenres();
-
-        PeopleRoles peopleRoles = resolvePeopleRoles(filteredCategoryToElement, imdbParser);
-
         Set<String> companies = Sets.union(
                 getProductionCompany(filteredCategoryToElement),
                 getDistributedBy(filteredCategoryToElement));
-
-        MovieData movieData = MovieData.builder()
-                .title(title)
-                .year(2018)
-                .peopleRoles(peopleRoles)
-                .genres(genres)
-                .companies(companies)
-                .countries(countries)
-                .build();
-
-        return movieData;
-    }
-
-    private static PeopleRoles resolvePeopleRoles(Map<String, Element> filteredCategoryToElement,
-            ImdbMovieParser imdbParser) {
 
         Set<String> directors = Optional.ofNullable(filteredCategoryToElement.get("Directed by"))
                 .map(WikipediaMovieParser::getDirectors)
@@ -90,20 +69,55 @@ public class WikipediaMovieParser {
 
         Set<String> actors = Optional.ofNullable(filteredCategoryToElement.get("Starring"))
                 .map(WikipediaMovieParser::getActors)
-                .orElseGet(() -> imdbParser.getActors());
+                // .orElseGet(() -> imdbParser.getActors());
+                .orElse(emptySet());
 
         Set<String> screenwriters = Sets.union(
                 getWrittenBy(filteredCategoryToElement),
                 getScreenplayBy(filteredCategoryToElement));
 
+        Elements externalLinks = doc.children().select("a[href~=www.imdb.com]");
+        if (externalLinks.size() == 0) {
+            return MovieData.builder()
+                    .title(title)
+                    .peopleRoles(PeopleRoles.builder()
+                            .actors(actors)
+                            .directors(directors)
+                            .screenwriters(screenwriters)
+                            .build())
+                    .year(year)
+                    .companies(companies)
+                    .countries(countries)
+                    .build();
+        }
+
+        String imdbMovieId = externalLinks.first().attr("href").split("/")[4];
+
+        Supplier<Connection> connectionSupplier = new ConnectionSupplier();
+        ImdbMovieParser imdbParser = new ImdbMovieParser(connectionSupplier, imdbMovieId);
+        Set<String> genres = imdbParser.getGenres();
+
+        if (actors.isEmpty()) {
+            actors = imdbParser.getActors();
+        }
+
         PeopleRoles peopleRoles = PeopleRoles.builder()
                 .actors(actors)
+                .directors(directors)
                 .screenwriters(screenwriters)
                 .directors(directors)
                 .build();
 
-        return peopleRoles;
+        MovieData movieData = MovieData.builder()
+                .title(title)
+                .year(year)
+                .peopleRoles(peopleRoles)
+                .genres(genres)
+                .companies(companies)
+                .countries(countries)
+                .build();
 
+        return movieData;
     }
 
     private static Set<String> getDistributedBy(Map<String, Element> filteredCategoryToElement) {

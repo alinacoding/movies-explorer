@@ -16,11 +16,12 @@ public class MovieSearchApplication extends Application<Configuration> {
     }
 
     @Override
-    public void run(Configuration configuration, Environment environment) throws IOException {
+    public void run(Configuration configuration, Environment environment) throws IOException, InterruptedException {
         Supplier<Connection> connectionSupplier = new ConnectionSupplier();
         MovieDatabase movieDatabase = new MovieDatabase(connectionSupplier);
-        Set<MovieData> movies = WikipediaParser.getMovies();
-        movieDatabase.populateDatabase(movies);
+        int year = 2017;
+        Set<MovieData> movies = WikipediaParser.getMovies(year);
+        movieDatabase.populateDatabase(movies, year);
         MovieSearchResource movieSearchResource = new MovieSearchResource(movieDatabase);
         environment.jersey().register(movieSearchResource);
     }

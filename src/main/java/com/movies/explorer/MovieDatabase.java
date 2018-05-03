@@ -1,5 +1,6 @@
 package com.movies.explorer;
 
+import static java.util.Collections.emptySet;
 import static java.util.stream.Collectors.toSet;
 
 import java.sql.Array;
@@ -15,11 +16,11 @@ import java.util.stream.Stream;
 
 public class MovieDatabase {
 
-    private static final String DROP_TABLE = "DROP TABLE IF EXISTS movies;";
+    // private static final String DROP_TABLE = "DROP TABLE IF EXISTS movies;";
 
     private static final String ENABLE_CITEXT = "CREATE EXTENSION IF NOT EXISTS citext WITH SCHEMA public;";
 
-    private static final String CREATE_TABLE = "CREATE TABLE movies (" +
+    private static final String CREATE_TABLE = "CREATE TABLE IF NOT EXISTS movies (" +
             "title CITEXT NOT NULL, " +
             "year INTEGER NOT NULL, " +
             "companies CITEXT[], " +
@@ -28,7 +29,7 @@ public class MovieDatabase {
             "actors CITEXT[], " +
             "genres CITEXT[], " +
             "countries CITEXT[], " +
-            "PRIMARY KEY(title, year)" +
+            "PRIMARY KEY(title, year, actors)" +
             ");";
 
     private static final String INSERT_RECORD = "INSERT INTO movies VALUES (?,?,?,?,?,?,?,?)";
@@ -39,7 +40,7 @@ public class MovieDatabase {
         this.connectionSupplier = connectionSupplier;
     }
 
-    public void populateDatabase(Set<MovieData> movies) {
+    public void populateDatabase(Set<MovieData> movies, int year) {
         createTable();
         insertMovieData(movies);
     }
@@ -56,7 +57,7 @@ public class MovieDatabase {
     private void createTable() {
         try (Connection connection = connectionSupplier.get();
                 Statement statement = connection.createStatement()) {
-            statement.executeUpdate(DROP_TABLE);
+            // statement.executeUpdate(DROP_TABLE);
             statement.executeUpdate(ENABLE_CITEXT);
             statement.executeUpdate(CREATE_TABLE);
         } catch (SQLException e) {
@@ -82,7 +83,7 @@ public class MovieDatabase {
 
     private String partialSearchInArrayQuery(String field) {
         return "(EXISTS (SELECT * FROM UNNEST(" + field + ") "
-                + "AS unnested(item) WHERE unnested.item like '%' || ? || '%')) AND ";
+                + "AS unnested(item) WHERE unnested.item LIKE '%' || ? || '%')) AND ";
     }
 
     private String buildQueryFromSearchFields(MovieSearch movieSearch) {
@@ -190,21 +191,24 @@ public class MovieDatabase {
                     .title(resultSet.getString("title"))
                     .year(resultSet.getInt("year"))
                     .peopleRoles(PeopleRoles.builder()
-                            .directors(sqlArrayToList(resultSet.getArray("directors")))
-                            .screenwriters(sqlArrayToList(resultSet.getArray("screenwriters")))
-                            .actors(sqlArrayToList(resultSet.getArray("actors")))
+                            .directors(sqlArrayToSet(resultSet.getArray("directors")))
+                            .screenwriters(sqlArrayToSet(resultSet.getArray("screenwriters")))
+                            .actors(sqlArrayToSet(resultSet.getArray("actors")))
                             .build())
-                    .companies(sqlArrayToList(resultSet.getArray("companies")))
-                    .genres(sqlArrayToList(resultSet.getArray("genres")))
-                    .countries(sqlArrayToList(resultSet.getArray("countries")))
+                    .companies(sqlArrayToSet(resultSet.getArray("companies")))
+                    .genres(sqlArrayToSet(resultSet.getArray("genres")))
+                    .countries(sqlArrayToSet(resultSet.getArray("countries")))
                     .build();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private static Set<String> sqlArrayToList(Array sqlArray) {
+    private static Set<String> sqlArrayToSet(Array sqlArray) {
         try {
+            if (sqlArray == null) {
+                return emptySet();
+            }
             Object[] strArray = (Object[]) sqlArray.getArray();
             return Stream.of(strArray).map(Object::toString).collect(toSet());
         } catch (SQLException e) {

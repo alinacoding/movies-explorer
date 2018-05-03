@@ -11,9 +11,9 @@ import org.jsoup.select.Elements;
 
 public class WikipediaParser {
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, InterruptedException {
 
-        Set<MovieData> movies = getMovies();
+        Set<MovieData> movies = getMovies(2018);
         movies.forEach(movie -> {
             System.out.println(movie.title());
             System.out.println(movie.companies());
@@ -26,11 +26,12 @@ public class WikipediaParser {
         System.out.println(movies.size());
     }
 
-    public static Set<MovieData> getMovies() throws IOException {
+    public static Set<MovieData> getMovies(int year) throws IOException, InterruptedException {
         Set<MovieData> movies = new HashSet<>();
-        Document doc = Jsoup.connect("https://en.wikipedia.org/wiki/2000_in_film").get();
+        Document doc = Jsoup.connect("https://en.wikipedia.org/wiki/" + year + "_in_film").get();
         Elements wikiTables = doc.select("table.wikitable");
         int numTables = wikiTables.size();
+        int movieCount = 0;
         for (int tableIndex = numTables - 1; tableIndex >= numTables - 4; tableIndex--) {
             Element wikiTable = wikiTables.get(tableIndex);
             Elements tableRows = wikiTable.children().select("tr");
@@ -47,12 +48,14 @@ public class WikipediaParser {
                 String title = cells.get(0).text().replaceAll("\\p{P}", "");
                 System.out.println(title);
                 String movieUrl = "https://en.wikipedia.org" + endpoint;
-                MovieData movieData = WikipediaMovieParser.parseMovieData(movieUrl, title);
+                MovieData movieData = WikipediaMovieParser.parseMovieData(movieUrl, title, year);
                 movies.add(movieData);
-                break;
+                movieCount++;
+                if (movieCount % 10 == 0) {
+                    Thread.sleep(1000);
+                }
             }
         }
         return movies;
-
     }
 }
