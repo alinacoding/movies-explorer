@@ -16,7 +16,7 @@ import java.util.stream.Stream;
 
 public class MovieDatabase {
 
-    // private static final String DROP_TABLE = "DROP TABLE IF EXISTS movies;";
+    private static final String DROP_TABLE = "DROP TABLE IF EXISTS movies;";
 
     private static final String ENABLE_CITEXT = "CREATE EXTENSION IF NOT EXISTS citext WITH SCHEMA public;";
 
@@ -57,7 +57,7 @@ public class MovieDatabase {
     private void createTable() {
         try (Connection connection = connectionSupplier.get();
                 Statement statement = connection.createStatement()) {
-            // statement.executeUpdate(DROP_TABLE);
+            statement.executeUpdate(DROP_TABLE);
             statement.executeUpdate(ENABLE_CITEXT);
             statement.executeUpdate(CREATE_TABLE);
         } catch (SQLException e) {

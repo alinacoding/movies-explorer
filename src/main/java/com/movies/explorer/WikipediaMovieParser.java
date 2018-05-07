@@ -94,7 +94,7 @@ public class WikipediaMovieParser {
         String imdbMovieId = externalLinks.first().attr("href").split("/")[4];
 
         Supplier<Connection> connectionSupplier = new ConnectionSupplier();
-        ImdbMovieParser imdbParser = new ImdbMovieParser(connectionSupplier, imdbMovieId);
+        ImdbMovieQueryExecutor imdbParser = new ImdbMovieQueryExecutor(connectionSupplier, imdbMovieId);
         Set<String> genres = imdbParser.getGenres();
 
         if (actors.isEmpty()) {
