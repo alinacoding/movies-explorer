@@ -1,20 +1,38 @@
-plugins {
-  id "org.inferred.processors" version "1.2.15"
-}
+
 
 apply plugin: 'application'
 apply plugin: 'eclipse'
+apply plugin: 'java'
+apply plugin: 'com.github.johnrengelman.shadow'
+
+buildscript {
+  repositories {
+    jcenter()
+  }
+  dependencies {
+    classpath 'com.github.jengelman.gradle.plugins:shadow:1.2.4'
+  }
+}
+
 
 sourceCompatibility = 9
 targetCompatibility = 9
 
-repositories {
-     mavenCentral()
+ext {
+        immutablesVersion = '2.5.6'
 }
-
 mainClassName = 'com.movies.explorer.MovieSearchApplication'
 
-jar {
+shadowJar {
+    mergeServiceFiles()
+    mainClassName = mainClassName
+}
+repositories {
+     mavenCentral()
+     maven { url "https://plugins.gradle.org/m2/" }
+}
+
+jar { 
     manifest {
         attributes(
 		"Implementation-Title": project.name,
@@ -26,12 +44,15 @@ jar {
 applicationDefaultJvmArgs = ["--add-modules", "java.xml.bind"]
 
 dependencies {
+	compile 'io.dropwizard:dropwizard-core:1.3.0'
+
 	compile group: 'org.postgresql', name: 'postgresql', version: '42.2.2'
 	compile group: 'com.google.guava', name: 'guava', version: '24.1-jre'
 	compile group: 'commons-io', name: 'commons-io', version: '2.6'
-	processor 'org.immutables:value:2.5.6'
+	compileOnly group: 'org.immutables', name: 'value', version: '2.5.6'
 	compile group: 'com.squareup.okhttp', name: 'okhttp', version: '2.7.5'
 	implementation 'com.squareup.okhttp3:okhttp:3.10.0'
 	compile group: 'org.jsoup', name: 'jsoup', version: '1.11.2'
-	implementation 'io.dropwizard:dropwizard-core:1.3.0'
+	implementation group: 'io.dropwizard', name: 'dropwizard-core', version: '1.3.0'
+	implementation group: 'org.codehaus.groovy', name: 'groovy-all', version: '2.4.12'
 }
